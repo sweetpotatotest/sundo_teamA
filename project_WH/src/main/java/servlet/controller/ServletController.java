@@ -22,4 +22,5 @@ public class ServletController {
 		
 		return "main/main";
 	}
+	
 }
