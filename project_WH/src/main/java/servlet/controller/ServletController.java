@@ -29,4 +29,8 @@ public class ServletController {
 		return "main/maptest";
 	}
 	
+	@RequestMapping("wfsMap/main.do")
+	public String wfsMap() {
+		return "main/wfsMap";
+	}
 }
