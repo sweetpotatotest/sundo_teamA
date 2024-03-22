@@ -123,7 +123,7 @@
 		<button type="button"
 			onclick="javascript:deleteLayerByName('VHYBRID');" name="rpg_1">레이어삭제하기</button>
 	</div>
-	<button onclick="location.href='/mapTest/main.do'">openlayers</button>
-	<button onclick="location.href='/wfsMap/main.do'">wfs</button>
+	<button onclick="location.href='/mapTest.do'">openlayers</button>
+	<button onclick="location.href='/wfsMap.do'">wfs</button>
 </body>
 </html>

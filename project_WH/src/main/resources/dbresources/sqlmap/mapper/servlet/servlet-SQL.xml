@@ -12,4 +12,16 @@
 				1=1
 		]]>
 	</select>
+	
+	<select id="sggList" resultType="Map">
+		SELECT sgg_nm FROM tl_sgg
+	</select>
+	
+	<select id="sdList" resultType="Map">
+		SELECT sd_nm FROM tl_sd
+	</select>
+	
+	<select id="bjdList" resultType="Map">
+		SELECT bjd_nm FROM tl_bjd
+	</select>
 </mapper>
