@@ -23,11 +23,6 @@
 $(document).ready(function() {
 	zoomin = 8;
 	
-	$('#sdSelect').change(function() {
-		alert("변함");
-		zoomin = 12;
-	})
-	
     let map = new ol.Map(
         { // OpenLayer의 맵 객체를 생성한다.
           target : 'map', // 맵 객체를 연결하기 위한 target으로 <div>의 id값을 지정해준다.
@@ -83,6 +78,27 @@ $(document).ready(function() {
 	
 	map.addLayer(sd); // 맵 객체에 레이어를 추가함
 	
+	$('#sdSelect').change(function() {
+	    var sdSelected = $(this).val();
+	    
+	    $.ajax({
+	        url			: '/sdSelect.do', // 서버 URL 지정
+	        type		: 'post', // HTTP 메서드 지정
+	        dataType 	: 'text',
+	        data		: {'sdSelect' : sdSelected}, // 전송할 데이터 설정
+	        success		: function(data) {
+	            console.log(data);
+	            var sggSelect = $('#sggSelect');
+	          	alert(sggSelect);
+	        },
+	        error		: function(error) {
+	            // 서버와의 통신 중 오류가 발생했을 때 실행되는 콜백 함수
+	            console.log(error);
+	            alert(error);
+	        }
+	    });
+	});
+
 	
 });
 </script>
@@ -91,19 +107,16 @@ $(document).ready(function() {
 <body>
 	<div>
 		<select id="sdSelect" name="sdSelect">
-	    	<c:forEach items="${sdList }" var="sd">
-	        	<option value="${sd.sd_nm }">${sd.sd_nm }</option>
-	    	</c:forEach>
+	    	<option>시도 선택</option>
+		    <c:forEach items="${sdList }" var="sd">
+		        <option value="${sd.sd_nm }">${sd.sd_nm }</option>
+		    </c:forEach>
 		</select>
-		<select name="sggSelect">
-	    	<c:forEach items="${sggList }" var="sgg">
-	        	<option value="${sgg.sgg_nm }">${sgg.sgg_nm }</option>
-	    	</c:forEach>
+		<select id="sggSelect" name="sggSelect">
+			<option>시군구 선택</option>
 		</select>
-		<select name="sdSelect">
-	    	<c:forEach items="${bjdList }" var="bjd">
-	        	<option value="${bjd.bjd_nm }">${bjd.bjd_nm }</option>
-	    	</c:forEach>
+		<select id="bjdSelect" name="bjdSelect">
+			<option>법정동 선택</option>
 		</select>
 	</div>
 	
