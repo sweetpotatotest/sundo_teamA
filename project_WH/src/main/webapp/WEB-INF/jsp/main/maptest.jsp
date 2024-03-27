@@ -80,16 +80,24 @@ $(document).ready(function() {
 	
 	$('#sdSelect').change(function() {
 	    var sdSelected = $(this).val();
+	    $('#showSd').text("선택된 시도: " + sdSelected);
 	    
 	    $.ajax({
 	        url			: '/sdSelect.do', // 서버 URL 지정
 	        type		: 'post', // HTTP 메서드 지정
-	        dataType 	: 'text',
+	        dataType 	: 'json',
 	        data		: {'sdSelect' : sdSelected}, // 전송할 데이터 설정
 	        success		: function(data) {
-	            console.log(data);
+	            console.log(data); // 데이터 확인
 	            var sggSelect = $('#sggSelect');
-	          	alert(sggSelect);
+	            sggSelect.empty(); // 시군구 선택 옵션 초기화
+	            sggSelect.append("<option value='' selected disabled>시군구 선택</option>"); // 시도 변경 시 다시 기본값 설정
+	            $('#bjdSelect').append("<option value='' selected disabled>법정동 선택</option>");
+	            	
+	            for (var i = 0; i < data.length; i++) {
+	                  var option = $("<option>"+data[i].sgg_nm+"</option>");
+	                  sggSelect.append(option);
+	            };
 	        },
 	        error		: function(error) {
 	            // 서버와의 통신 중 오류가 발생했을 때 실행되는 콜백 함수
@@ -99,6 +107,41 @@ $(document).ready(function() {
 	    });
 	});
 
+	$('#sggSelect').change(function() {
+		var sggSelected = $(this).val();
+		var sdSelected = $('#sdSelect').val();
+		$('#showSgg').text("선택된 시군구: " + sggSelected);
+		
+		$.ajax({
+			url : '/sggSelect.do',
+			type : 'post',
+			datatype : 'json',
+			data : {'sgg' : sggSelected, 'sd' : sdSelected},
+			success : function(data) {
+				console.log(data);
+				var bjdSelect = $('#bjdSelect');
+				bjdSelect.empty();
+				bjdSelect.append("<option value='' selected disabled>법정동 선택</option>")
+				
+				for (var i = 0; i < data.length; i++) {
+					var bjd = $("<option>"+data[i].bjd_nm+"</option>");
+					bjdSelect.append(bjd);
+				}
+				
+			},
+			error : function(error) {
+				console.log(error);
+				alert(error);
+			}
+			
+		});
+	});
+	
+	$('#bjdSelect').change(function (){
+		var bjdSelected = $(this).val();
+		$('#showBjd').text("선택된 법정동: " + bjdSelected);
+	});
+	
 	
 });
 </script>
@@ -113,13 +156,19 @@ $(document).ready(function() {
 		    </c:forEach>
 		</select>
 		<select id="sggSelect" name="sggSelect">
-			<option>시군구 선택</option>
+    		<option>시군구 선택</option>
 		</select>
 		<select id="bjdSelect" name="bjdSelect">
 			<option>법정동 선택</option>
 		</select>
 	</div>
-	
+	<div>
+		<p id="showSd"></p>
+		<p id="showSgg"></p>
+		<p id="showBjd"></p>
+	</div>
+	<button onclick="location.href='/dataInput.do'">데이터 삽입</button>
+	<button onclick="location.href='/main.do'">메인이동</button>
 	<div id="map" class="map"></div>
 </body>
 </html>
