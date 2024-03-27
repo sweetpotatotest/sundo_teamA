@@ -11,4 +11,6 @@ public interface ServletService {
 	List<Map<String, Object>> sdList();
 
 	List<Map<String, Object>> bjdList();
+
+	void dataInput(List<Map<String, Object>> list);
 }

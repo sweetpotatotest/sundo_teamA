@@ -43,7 +43,7 @@ $(document).ready(function() {
     
     //? 왜 안되지 - 이름오류
     // 법정동 레이어
-    var wms = new ol.layer.Tile({
+    var bjd = new ol.layer.Tile({
 		source : new ol.source.TileWMS({
 			url : 'http://localhost:8080/geoserver/project_sundo/wms', // 1. 레이어 URL
 			params : {
@@ -58,7 +58,7 @@ $(document).ready(function() {
 		visible: false
 	});
 	
-	map.addLayer(wms); // 맵 객체에 레이어를 추가함
+	map.addLayer(bjd); // 맵 객체에 레이어를 추가함
 	
 	//시도 레이어
     var sd = new ol.layer.Tile({
@@ -76,11 +76,37 @@ $(document).ready(function() {
     	visible: false
 	});
 	
-	map.addLayer(sd); // 맵 객체에 레이어를 추가함
+	//시군구 레이어
+    var sgg = new ol.layer.Tile({
+		source : new ol.source.TileWMS({
+			url : 'http://localhost:8080/geoserver/project_sundo/wms', // 1. 레이어 URL
+			params : {
+				'VERSION' : '1.1.0', // 2. 버전
+				'LAYERS' : 'project_sundo:tl_sgg', // 3. 작업공간:레이어 명
+				'BBOX' : [1.386872E7, 3906626.5, 1.4428071E7, 4670269.5	], 
+				'SRS' : 'EPSG:3857', // SRID
+				'FORMAT' : 'image/png' // 포맷
+			},
+			serverType : 'geoserver',
+		}),
+    	visible: false
+	});
+	
+	map.addLayer(sgg); // 맵 객체에 레이어를 추가함
 	
 	$('#sdSelect').change(function() {
 	    var sdSelected = $(this).val();
 	    $('#showSd').text("선택된 시도: " + sdSelected);
+	    
+	    // 시도 레이어 표시 여부를 결정합니다.
+	    if (sdSelected != null) {
+	        bjd.setVisible(false); // 서울특별시를 선택하면 시도 레이어를 보이도록 설정합니다.
+	        sd.setVisible(false); // 다른 시도 레이어는 숨깁니다.
+	        sgg.setVisible(true); // 다른 시도 레이어는 숨깁니다.
+	    } else {
+	    	 bjd.setVisible(false); // 시도를 선택하지 않으면 시도 레이어를 숨깁니다.
+		     sd.setVisible(false); 
+		}
 	    
 	    $.ajax({
 	        url			: '/sdSelect.do', // 서버 URL 지정

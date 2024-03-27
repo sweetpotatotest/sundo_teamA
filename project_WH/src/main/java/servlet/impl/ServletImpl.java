@@ -37,4 +37,9 @@ public class ServletImpl extends EgovAbstractServiceImpl implements ServletServi
 	public List<Map<String, Object>> bjdList() {
 		return dao.bjdList();
 	}
+
+	@Override
+	public void dataInput(List<Map<String, Object>> list) {
+		dao.dataInput(list);
+	}
 }

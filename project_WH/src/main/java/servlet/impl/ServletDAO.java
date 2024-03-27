@@ -31,4 +31,10 @@ public class ServletDAO extends EgovComAbstractDAO {
 		return selectList("servlet.bjdList");
 	}
 
+	public void dataInput(List<Map<String, Object>> list) {
+		for (Map<String, Object> map : list) {
+			insert("servlet.dataInput", map);
+		}
+	}
+
 }

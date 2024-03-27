@@ -24,4 +24,8 @@
 	<select id="bjdList" resultType="Map">
 		SELECT bjd_nm FROM tl_bjd
 	</select>
+	
+	<insert id="dataInput" parameterType="Map">
+		INSERT INTO "TB_CARBON_A1" (useym, location, adlocation, sgg_cd, bjd_cd, loc_cd, bun, ji, newad, newad_cd, newad_under_cd, newad_main, newad_sub, usekwh) VALUES (#{useym}, #{location}, #{adlocation}, #{sgg_cd}, #{bjd_cd}, #{loc_cd}, #{bun}, #{ji}, #{newad}, #{newad_cd}, #{newad_under_cd}, #{newad_main}, #{newad_sub}, #{usekwh})
+	</insert>
 </mapper>
