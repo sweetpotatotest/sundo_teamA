@@ -2,18 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="rest">
 	<select id="sdSelect" parameterType="String" resultType="Map">
-		SELECT REPLACE(sgg_nm, #{sd}, '')as sgg_nm FROM tl_sgg 
+		SELECT REPLACE(sgg_nm, #{sd}, '')as sgg_nm, adm_sect_c as sgg_cd FROM tl_sgg 
 		WHERE sgg_nm LIKE CONCAT(#{sd}, '%')
 	</select>
 	
 	<select id="bjdList" parameterType="Map" resultType="Map">
-		SELECT bjd_nm FROM tl_bjd
-		WHERE sgg_cd = (SELECT sgg_cd FROM tl_sgg WHERE sgg_nm LIKE CONCAT(#{sd}, ' ', #{sgg}))
+		SELECT bjd_nm, bjd_cd FROM tl_bjd
+		WHERE sgg_cd = #{sgg_cd}
 	</select>
 	
 	<select id="bjdListSd" parameterType="String" resultType="Map">
-		SELECT bjd_nm FROM tl_bjd
+		SELECT bjd_nm, bjd_cd FROM tl_bjd
 		WHERE sgg_cd = (SELECT sgg_cd FROM tl_sgg WHERE sd_nm = #{sd})
+	</select>
+	
+	<select id="getBjdGeometry" parameterType="String" resultType="Map">
+		SELECT 
+			ST_XMin(ST_Extent(geom)) AS minX, 
+			ST_YMin(ST_Extent(geom)) AS minY, 
+			ST_XMax(ST_Extent(geom)) AS maxX, 
+			ST_YMax(ST_Extent(geom)) AS maxY, 
+			geom
+		FROM tl_bjd 
+		WHERE bjd_cd = #{bjd_cd}
+		GROUP BY geom
 	</select>
 	
 </mapper>

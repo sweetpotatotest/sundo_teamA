@@ -35,8 +35,11 @@ $(document).ready(function() {
 			alert("확장자가 안 맞으면 멈추기");
 		}
 		
-		
 	});
+	
+	$('#test').click(function(){
+		Snackbar.make(view, "스낵바입니다", Snackbar.LENGTH_LONG).show();
+	});	
 });
 </script>
 </head>
@@ -45,5 +48,7 @@ $(document).ready(function() {
 		<input type="file" id="file" name="file" accept="txt">
 	</form>
 		<button type="button" id="fileBtn">파일 전송</button>
+		
+		<button id="test">snack</button>
 </body>
 </html>

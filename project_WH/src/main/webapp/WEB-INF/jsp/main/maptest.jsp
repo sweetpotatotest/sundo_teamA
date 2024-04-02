@@ -9,8 +9,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 <!-- OpenLayer -->
-<script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v6.15.1/build/ol.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v6.15.1/ol.css">
+<script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <style>
@@ -20,8 +21,10 @@
 }
 </style>
 <script type="text/javascript">
+
 $(document).ready(function() {
-	zoomin = 8;
+	var zoomin = 8;
+	var bjdSelectedGeom = null;
 	
     let map = new ol.Map(
         { // OpenLayer의 맵 객체를 생성한다.
@@ -51,7 +54,8 @@ $(document).ready(function() {
 				'LAYERS' : 'project_sundo:tl_bjd', // 3. 작업공간:레이어 명
 				'BBOX' : [1.3873946E7, 3906626.5, 1.4428045E7, 4670269.5], 
 				'SRS' : 'EPSG:3857', // SRID
-				'FORMAT' : 'image/png' // 포맷
+				'FORMAT' : 'image/png', // 포맷
+				'CQL_FILTER' : "geom = '" + bjdSelectedGeom + "'" //원하는 레이어 필터걸기
 			},
 			serverType : 'geoserver',
 		}),
@@ -94,15 +98,32 @@ $(document).ready(function() {
 	
 	map.addLayer(sgg); // 맵 객체에 레이어를 추가함
 	
+	//전기사용량 레이어
+	var kwh = new ol.layer.Tile({
+		source : new ol.source.TileWMS({
+			url : 'http://localhost:8080/geoserver/project_sundo/wms', // 1. 레이어 URL
+			params : {
+				'VERSION' : '1.1.0', // 2. 버전
+				'LAYERS' : 'project_sundo:a1test_bjd', // 3. 작업공간:레이어 명
+				'BBOX' : [1.3873946E7, 3906626.5, 1.4428045E7, 4670269.5], 
+				'SRS' : 'EPSG:3857', // SRID
+				'FORMAT' : 'image/png' // 포맷
+			},
+			serverType : 'geoserver',
+		}),
+    	visible: false
+	});
+	
+	map.addLayer(kwh);
+	
 	$('#sdSelect').change(function() {
 	    var sdSelected = $(this).val();
 	    $('#showSd').text("선택된 시도: " + sdSelected);
 	    
 	    // 시도 레이어 표시 여부를 결정합니다.
 	    if (sdSelected != null) {
-	        bjd.setVisible(false); // 서울특별시를 선택하면 시도 레이어를 보이도록 설정합니다.
-	        sd.setVisible(false); // 다른 시도 레이어는 숨깁니다.
-	        sgg.setVisible(true); // 다른 시도 레이어는 숨깁니다.
+	        sd.setVisible(true); // 다른 시도 레이어는 숨깁니다.
+	        sgg.setVisible(false); // 다른 시도 레이어는 숨깁니다.
 	    } else {
 	    	 bjd.setVisible(false); // 시도를 선택하지 않으면 시도 레이어를 숨깁니다.
 		     sd.setVisible(false); 
@@ -121,8 +142,10 @@ $(document).ready(function() {
 	            $('#bjdSelect').append("<option value='' selected disabled>법정동 선택</option>");
 	            	
 	            for (var i = 0; i < data.length; i++) {
-	                  var option = $("<option>"+data[i].sgg_nm+"</option>");
-	                  sggSelect.append(option);
+					var sgg_nm = data[i].sgg_nm
+					var sgg_cd = data[i].sgg_cd
+					var option = $("<option value='" + sgg_cd + "'>" + sgg_nm + "</option>");
+	                sggSelect.append(option);
 	            };
 	        },
 	        error		: function(error) {
@@ -134,7 +157,8 @@ $(document).ready(function() {
 	});
 
 	$('#sggSelect').change(function() {
-		var sggSelected = $(this).val();
+		var sggSelected = $(this).find('option:selected').text().trim();
+		var sggSelectedCd = $(this).val();
 		var sdSelected = $('#sdSelect').val();
 		$('#showSgg').text("선택된 시군구: " + sggSelected);
 		
@@ -142,16 +166,19 @@ $(document).ready(function() {
 			url : '/sggSelect.do',
 			type : 'post',
 			datatype : 'json',
-			data : {'sgg' : sggSelected, 'sd' : sdSelected},
+			data : {'sgg' : sggSelected, 'sd' : sdSelected, 'sgg_cd' : sggSelectedCd},
 			success : function(data) {
 				console.log(data);
+				
 				var bjdSelect = $('#bjdSelect');
 				bjdSelect.empty();
 				bjdSelect.append("<option value='' selected disabled>법정동 선택</option>")
 				
 				for (var i = 0; i < data.length; i++) {
-					var bjd = $("<option>"+data[i].bjd_nm+"</option>");
-					bjdSelect.append(bjd);
+					var bjd_nm = data[i].bjd_nm
+					var bjd_cd = data[i].bjd_cd
+					var option = $("<option value='" + bjd_cd + "'>" + bjd_nm + "</option>");
+					bjdSelect.append(option);
 				}
 				
 			},
@@ -164,12 +191,70 @@ $(document).ready(function() {
 	});
 	
 	$('#bjdSelect').change(function (){
-		var bjdSelected = $(this).val();
+		var bjdSelectedCd = $(this).val();
+		var bjdSelected = $(this).find('option:selected').text().trim();
+		console.log(bjdSelectedCd);
+		console.log(bjdSelected);
 		$('#showBjd').text("선택된 법정동: " + bjdSelected);
+		
+		 // 첫 번째 AJAX 요청
+	   // var promise1 = new Promise(function(resolve, reject) {
+	        $.ajax({
+	            url: '/getBjdGeometry.do', 
+	            type: 'post',
+	            dataType: 'json',
+	            data: {'bjd_cd': bjdSelectedCd},
+	            success: function(data) {
+	                console.log(data);
+	                // 가져온 법정동 좌표를 이용하여 해당 영역만 지도에 표시
+	                var extent = [data.minx, data.miny, data.maxx, data.maxy]; // 좌표의 최소 및 최대값
+	                var extentTransformed = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:3857'); // 좌표계 변환
+
+	                map.getView().fit(extentTransformed, map.getSize()); // 해당 범위로 지도를 이동 및 확대/축소
+	                bjd.setVisible(true);
+	                resolve(); // Promise 완료
+	            },
+	            error: function(error) {
+	                console.log(error);
+	                reject(error); // Promise 실패
+	            }
+	        });
+	    //});
+	    
+	    /* // 두 번째 AJAX 요청
+	    var promise2 = new Promise(function(resolve, reject) {
+	        $.ajax({
+	            url: '/getBjdGeom.do', 
+	            type: 'post',
+	            dataType: 'json',
+	            data: {'bjd_cd': bjdSelectedCd},
+	            success: function(data) {
+	                console.log(data);
+	                resolve(); // Promise 완료
+	            },
+	            error: function(error) {
+	                console.log(error);
+	                reject(error); // Promise 실패
+	            }
+	        });
+	    });
+
+	    // 두 개의 Promise가 모두 완료될 때까지 기다린 후 처리
+	    Promise.all([promise1, promise2]).then(function() {
+	        console.log('Both promises are fulfilled.');
+	        // 두 개의 AJAX 요청이 완료되었으므로 추가 처리 가능
+	    }).catch(function(error) {
+	        console.log('Error:', error);
+	    }); */
+		
 	});
 	
+	$('#kwhuse').click(function (){
+		 kwh.setVisible(true);
+	});
 	
 });
+
 </script>
 
 </head>
@@ -193,6 +278,7 @@ $(document).ready(function() {
 		<p id="showSgg"></p>
 		<p id="showBjd"></p>
 	</div>
+	<button id="kwhuse">전기사용량</button>
 	<button onclick="location.href='/dataInput.do'">데이터 삽입</button>
 	<button onclick="location.href='/main.do'">메인이동</button>
 	<div id="map" class="map"></div>

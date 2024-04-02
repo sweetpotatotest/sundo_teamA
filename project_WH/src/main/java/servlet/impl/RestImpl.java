@@ -22,13 +22,23 @@ public class RestImpl extends EgovAbstractServiceImpl implements RestService{
 	}
 
 	@Override
-	public List<Map<String, Object>> bjdList(Map<String, String> param) {
-		return dao.bjdList(param);
+	public List<Map<String, Object>> bjdList(String sgg_cd) {
+		return dao.bjdList(sgg_cd);
 	}
 
 	@Override
 	public List<Map<String, Object>> bjdListSd(String sd) {
 		return dao.bjdListSd(sd);
 	}
+
+	@Override
+	public Map<String, Object> getBjdGeometry(String bjd_cd) {
+		return dao.getBjdGeometry(bjd_cd);
+	}
+
+	/*
+	 * @Override public Geometry getBjdGeom(String bjd_cd) { return
+	 * dao.getBjdGeom(bjd_cd); }
+	 */
 	
 }
