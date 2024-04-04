@@ -24,6 +24,7 @@
 
 $(document).ready(function() {
 	var zoomin = 8;
+	var khwBjdChoose = null;
 	var bjdSelectedGeom = null;
 	
     let map = new ol.Map(
@@ -55,7 +56,7 @@ $(document).ready(function() {
 				'BBOX' : [1.3873946E7, 3906626.5, 1.4428045E7, 4670269.5], 
 				'SRS' : 'EPSG:3857', // SRID
 				'FORMAT' : 'image/png', // 포맷
-				'CQL_FILTER' : "geom = '" + bjdSelectedGeom + "'" //원하는 레이어 필터걸기
+				'CQL_FILTER' : "bjd_cd = '" + bjdSelectedGeom + "'" //원하는 레이어 필터걸기
 			},
 			serverType : 'geoserver',
 		}),
@@ -107,7 +108,8 @@ $(document).ready(function() {
 				'LAYERS' : 'project_sundo:a1test_bjd', // 3. 작업공간:레이어 명
 				'BBOX' : [1.3873946E7, 3906626.5, 1.4428045E7, 4670269.5], 
 				'SRS' : 'EPSG:3857', // SRID
-				'FORMAT' : 'image/png' // 포맷
+				'FORMAT' : 'image/png', // 포맷
+				'CQL_FILTER' : "bjd_cd= '" + khwBjdChoose + "'" //원하는 레이어 필터걸기
 			},
 			serverType : 'geoserver',
 		}),
@@ -196,56 +198,31 @@ $(document).ready(function() {
 		console.log(bjdSelectedCd);
 		console.log(bjdSelected);
 		$('#showBjd').text("선택된 법정동: " + bjdSelected);
+		//해당 법정동의 레이어 띄우기
+		var cqlFilter = "bjd_cd= '" + bjdSelectedCd + "'";
+		updateLayerFilter(bjd, cqlFilter);
+		updateLayerFilter(kwh, cqlFilter);
 		
-		 // 첫 번째 AJAX 요청
-	   // var promise1 = new Promise(function(resolve, reject) {
 	        $.ajax({
 	            url: '/getBjdGeometry.do', 
 	            type: 'post',
 	            dataType: 'json',
 	            data: {'bjd_cd': bjdSelectedCd},
 	            success: function(data) {
-	                console.log(data);
+	                
 	                // 가져온 법정동 좌표를 이용하여 해당 영역만 지도에 표시
 	                var extent = [data.minx, data.miny, data.maxx, data.maxy]; // 좌표의 최소 및 최대값
 	                var extentTransformed = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:3857'); // 좌표계 변환
 
 	                map.getView().fit(extentTransformed, map.getSize()); // 해당 범위로 지도를 이동 및 확대/축소
+	                
 	                bjd.setVisible(true);
-	                resolve(); // Promise 완료
+	                kwh.setVisible(true);
 	            },
 	            error: function(error) {
 	                console.log(error);
-	                reject(error); // Promise 실패
 	            }
 	        });
-	    //});
-	    
-	    /* // 두 번째 AJAX 요청
-	    var promise2 = new Promise(function(resolve, reject) {
-	        $.ajax({
-	            url: '/getBjdGeom.do', 
-	            type: 'post',
-	            dataType: 'json',
-	            data: {'bjd_cd': bjdSelectedCd},
-	            success: function(data) {
-	                console.log(data);
-	                resolve(); // Promise 완료
-	            },
-	            error: function(error) {
-	                console.log(error);
-	                reject(error); // Promise 실패
-	            }
-	        });
-	    });
-
-	    // 두 개의 Promise가 모두 완료될 때까지 기다린 후 처리
-	    Promise.all([promise1, promise2]).then(function() {
-	        console.log('Both promises are fulfilled.');
-	        // 두 개의 AJAX 요청이 완료되었으므로 추가 처리 가능
-	    }).catch(function(error) {
-	        console.log('Error:', error);
-	    }); */
 		
 	});
 	
@@ -253,7 +230,27 @@ $(document).ready(function() {
 		 kwh.setVisible(true);
 	});
 	
+	//필터 설정값 변경
+	function updateLayerFilter(layer, cqlFilter) {
+	    var source = layer.getSource();
+	    
+	    if (cqlFilter) {
+	        if (source.updateParams) {
+	            source.updateParams({ 'CQL_FILTER': cqlFilter });
+	        } else {
+	            source.getParams()['CQL_FILTER'] = cqlFilter;
+	        }
+	    } else {
+	        // cqlFilter가 없는 경우에는 레이어의 파라미터에서 해당 필터를 제거
+	        if (source.updateParams) {
+	            source.updateParams({ 'CQL_FILTER': null });
+	        } else {
+	            delete source.getParams()['CQL_FILTER'];
+	        }
+	    }
+	}
 });
+
 
 </script>
 

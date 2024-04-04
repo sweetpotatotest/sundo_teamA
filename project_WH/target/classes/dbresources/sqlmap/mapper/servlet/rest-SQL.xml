@@ -21,11 +21,9 @@
 			ST_XMin(ST_Extent(geom)) AS minX, 
 			ST_YMin(ST_Extent(geom)) AS minY, 
 			ST_XMax(ST_Extent(geom)) AS maxX, 
-			ST_YMax(ST_Extent(geom)) AS maxY, 
-			geom
+			ST_YMax(ST_Extent(geom)) AS maxY 
 		FROM tl_bjd 
 		WHERE bjd_cd = #{bjd_cd}
-		GROUP BY geom
 	</select>
 	
 </mapper>

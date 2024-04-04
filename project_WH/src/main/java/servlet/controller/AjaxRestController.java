@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.locationtech.jts.geom.Geometry;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +37,7 @@ public class AjaxRestController {
 			//이름으로 리스트 부르기
 			bjdList = restService.bjdListSd(sd);
 		} else {
-			//2개 값 묶어서 가져가기
+			//2개 값 묶어서 가져가기 시군구 이름으로 부르기	
 			//Map<String, String> param = new HashMap<>();
 			//param.put("sgg", sgg);
 			//param.put("sd", sd);
@@ -55,11 +54,5 @@ public class AjaxRestController {
 		Map<String, Object> bjdGeometry = restService.getBjdGeometry(bjd_cd);
 		return bjdGeometry;
 	}
-	
-	/*
-	 * @PostMapping("/getBjdGeom.do") public Object
-	 * getBjdGeom(@RequestParam("bjd_cd") String bjd_cd) { Geometry geom =
-	 * restService.getBjdGeom(bjd_cd); return geom; }
-	 */
 	
 }

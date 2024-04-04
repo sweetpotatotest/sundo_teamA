@@ -3,7 +3,6 @@ package servlet.impl;
 import java.util.List;
 import java.util.Map;
 
-import org.locationtech.jts.geom.Geometry;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -29,10 +28,5 @@ public class RestDAO extends EgovComAbstractDAO {
 	public Map<String, Object> getBjdGeometry(String bjd_cd) {
 		return session.selectOne("rest.getBjdGeometry", bjd_cd);
 	}
-
-	/*
-	 * public Geometry getBjdGeom(String bjd_cd) { return
-	 * session.selectOne("rest.getBjdGeom", bjd_cd); }
-	 */
 
 }
