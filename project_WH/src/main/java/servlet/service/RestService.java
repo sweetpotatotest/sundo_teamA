@@ -12,5 +12,7 @@ public interface RestService {
 	List<Map<String, Object>> bjdListSd(String sd);
 
 	Map<String, Object> getBjdGeometry(String bjd_cd);
+	
+	Map<String, Object> getSggGeometry(String sgg_cd);
 
 }

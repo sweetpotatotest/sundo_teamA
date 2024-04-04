@@ -11,9 +11,13 @@
 <!-- OpenLayer -->
 <script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
-
+<!-- bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <style>
 .map {
    height: 800px;
@@ -21,11 +25,44 @@
 }
 </style>
 <script type="text/javascript">
+	//Load the Visualization API and the corechart package.
+	google.charts.load('current', {'packages':['corechart']});
+	
+	// Set a callback to run when the Google Visualization API is loaded.
+	google.charts.setOnLoadCallback(drawChart);
+	
+	// Callback that creates and populates a data table,
+	// instantiates the pie chart, passes in the data and
+	// draws it.
+	function drawChart() {
+	
+	  // Create the data table.
+	  var data = new google.visualization.DataTable();
+	  data.addColumn('string', 'Topping');
+	  data.addColumn('number', 'Slices');
+	  data.addRows([
+	    ['Mushrooms', 3],
+	    ['Onions', 1],
+	    ['Olives', 1],
+	    ['Zucchini', 1],
+	    ['Pepperoni', 2]
+	  ]);
+	
+	  // Set chart options
+	  var options = {'title':'How Much Pizza I Ate Last Night',
+	                 'width':400,
+	                 'height':300};
+	
+	  // Instantiate and draw our chart, passing in some options.
+	  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+	  chart.draw(data, options);
+	}
 
 $(document).ready(function() {
 	var zoomin = 8;
 	var khwBjdChoose = null;
 	var bjdSelectedGeom = null;
+	var sggSelectedGeom = null;
 	
     let map = new ol.Map(
         { // OpenLayer의 맵 객체를 생성한다.
@@ -90,7 +127,8 @@ $(document).ready(function() {
 				'LAYERS' : 'project_sundo:tl_sgg', // 3. 작업공간:레이어 명
 				'BBOX' : [1.386872E7, 3906626.5, 1.4428071E7, 4670269.5	], 
 				'SRS' : 'EPSG:3857', // SRID
-				'FORMAT' : 'image/png' // 포맷
+				'FORMAT' : 'image/png', // 포맷
+				'CQL_FILTER' : "sgg_cd = '" + sggSelectedGeom + "'" //원하는 레이어 필터걸기
 			},
 			serverType : 'geoserver',
 		}),
@@ -119,7 +157,7 @@ $(document).ready(function() {
 	map.addLayer(kwh);
 	
 	$('#sdSelect').change(function() {
-	    var sdSelected = $(this).val();
+	    var sdSelected = $(this).val(); //이름값
 	    $('#showSd').text("선택된 시도: " + sdSelected);
 	    
 	    // 시도 레이어 표시 여부를 결정합니다.
@@ -161,8 +199,10 @@ $(document).ready(function() {
 	$('#sggSelect').change(function() {
 		var sggSelected = $(this).find('option:selected').text().trim();
 		var sggSelectedCd = $(this).val();
-		var sdSelected = $('#sdSelect').val();
+		console.log(sggSelectedCd);
+		var sdSelected = $('#sdSelect').val(); //이름값
 		$('#showSgg').text("선택된 시군구: " + sggSelected);
+		
 		
 		$.ajax({
 			url : '/sggSelect.do',
@@ -170,7 +210,6 @@ $(document).ready(function() {
 			datatype : 'json',
 			data : {'sgg' : sggSelected, 'sd' : sdSelected, 'sgg_cd' : sggSelectedCd},
 			success : function(data) {
-				console.log(data);
 				
 				var bjdSelect = $('#bjdSelect');
 				bjdSelect.empty();
@@ -182,6 +221,31 @@ $(document).ready(function() {
 					var option = $("<option value='" + bjd_cd + "'>" + bjd_nm + "</option>");
 					bjdSelect.append(option);
 				}
+				
+		                updateLayerFilter(bjd, null);
+				        bjd.setVisible(false);
+		                sgg.setVisible(true);
+		                
+				$.ajax({
+		            url: '/getSggGeometry.do', 
+		            type: 'post',
+		            dataType: 'json',
+		            data: {'sgg_cd': sggSelectedCd},
+		            success: function(data) {
+		                var extent = [data.minx, data.miny, data.maxx, data.maxy]; // 좌표의 최소 및 최대값
+		                var extentTransformed = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:3857'); // 좌표계 변환
+
+		                map.getView().fit(extentTransformed, map.getSize()); // 해당 범위로 지도를 이동 및 확대/축소
+		                
+		                var cqlFilter = "sgg_cd= '" + sggSelectedCd + "'";
+		                updateLayerFilter(sgg, cqlFilter); // 시군구 레이어 업데이트
+		                
+		            },
+		            error: function(error) {
+		                console.log(error);
+		            }
+		        });
+				
 				
 			},
 			error : function(error) {
@@ -278,6 +342,31 @@ $(document).ready(function() {
 	<button id="kwhuse">전기사용량</button>
 	<button onclick="location.href='/dataInput.do'">데이터 삽입</button>
 	<button onclick="location.href='/main.do'">메인이동</button>
+	
+	<!-- Button trigger modal -->
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+	  Launch demo modal
+	</button>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered modal-xl">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      <div class="modal-body" id="chart_div"></div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary">Save changes</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	
 	<div id="map" class="map"></div>
+	
 </body>
 </html>

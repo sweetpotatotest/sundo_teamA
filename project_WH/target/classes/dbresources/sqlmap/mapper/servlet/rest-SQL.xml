@@ -26,4 +26,14 @@
 		WHERE bjd_cd = #{bjd_cd}
 	</select>
 	
+	<select id="getSggGeometry" parameterType="String" resultType="Map">
+		SELECT 
+			ST_XMin(ST_Extent(geom)) AS minX, 
+			ST_YMin(ST_Extent(geom)) AS minY, 
+			ST_XMax(ST_Extent(geom)) AS maxX, 
+			ST_YMax(ST_Extent(geom)) AS maxY 
+		FROM tl_sgg 
+		WHERE sgg_cd = #{sgg_cd}
+	</select>
+	
 </mapper>

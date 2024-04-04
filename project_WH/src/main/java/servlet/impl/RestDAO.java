@@ -28,5 +28,9 @@ public class RestDAO extends EgovComAbstractDAO {
 	public Map<String, Object> getBjdGeometry(String bjd_cd) {
 		return session.selectOne("rest.getBjdGeometry", bjd_cd);
 	}
+	
+	public Map<String, Object> getSggGeometry(String sgg_cd) {
+		return session.selectOne("rest.getSggGeometry", sgg_cd);
+	}
 
 }

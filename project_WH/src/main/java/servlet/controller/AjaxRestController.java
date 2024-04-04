@@ -28,8 +28,8 @@ public class AjaxRestController {
 	
 	@PostMapping("/sggSelect.do")
 	public List<Map<String, Object>> sggSelect(@RequestParam("sgg") String sgg, @RequestParam("sd") String sd, @RequestParam("sgg_cd") String sgg_cd) {
-		System.err.println(sgg);
-		System.err.println(sd);
+		//System.err.println(sgg);
+		//System.err.println(sd);
 		
 		List<Map<String, Object>> bjdList = null;
 		if (sgg == null || sgg == "") {
@@ -45,7 +45,7 @@ public class AjaxRestController {
 			//코드로만?
 			bjdList = restService.bjdList(sgg_cd);
 		}
-		System.err.println(bjdList);
+		//System.err.println(bjdList);
 		return bjdList;
 	}
 	
@@ -54,5 +54,14 @@ public class AjaxRestController {
 		Map<String, Object> bjdGeometry = restService.getBjdGeometry(bjd_cd);
 		return bjdGeometry;
 	}
+	
+	@PostMapping("/getSggGeometry.do")
+	public Map<String, Object> getSggGeometry(@RequestParam("sgg_cd") String sgg_cd){
+		Map<String, Object> sggGeometry = restService.getSggGeometry(sgg_cd);
+		System.err.println(sggGeometry);
+		return sggGeometry;
+	}
+	
+	
 	
 }

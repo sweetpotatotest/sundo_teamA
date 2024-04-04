@@ -35,5 +35,10 @@ public class RestImpl extends EgovAbstractServiceImpl implements RestService{
 	public Map<String, Object> getBjdGeometry(String bjd_cd) {
 		return dao.getBjdGeometry(bjd_cd);
 	}
+
+	@Override
+	public Map<String, Object> getSggGeometry(String sgg_cd) {
+		return dao.getSggGeometry(sgg_cd);
+	}
 	
 }
