@@ -15,4 +15,8 @@ public interface RestService {
 	
 	Map<String, Object> getSggGeometry(String sgg_cd);
 
+	List<Map<String, Object>> charData();
+
+	List<Map<String, Object>> charDataSgg(String sd_nm);
+
 }

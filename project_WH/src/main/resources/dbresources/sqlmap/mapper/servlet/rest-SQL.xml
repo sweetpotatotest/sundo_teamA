@@ -36,4 +36,11 @@
 		WHERE sgg_cd = #{sgg_cd}
 	</select>
 	
+	<select id="charData" resultType="Map">
+		SELECT sd_nm, usekwh FROM a1usekwh_sd
+	</select>
+	
+	<select id="charDataSgg" parameterType="String" resultType="Map">
+		SELECT sgg_nm, usekwh FROM a1usekwh_sgg WHERE sd_nm = #{sd_nm}
+	</select>
 </mapper>

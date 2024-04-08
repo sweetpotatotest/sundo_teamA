@@ -25,39 +25,6 @@
 }
 </style>
 <script type="text/javascript">
-	//Load the Visualization API and the corechart package.
-	google.charts.load('current', {'packages':['corechart']});
-	
-	// Set a callback to run when the Google Visualization API is loaded.
-	google.charts.setOnLoadCallback(drawChart);
-	
-	// Callback that creates and populates a data table,
-	// instantiates the pie chart, passes in the data and
-	// draws it.
-	function drawChart() {
-	
-	  // Create the data table.
-	  var data = new google.visualization.DataTable();
-	  data.addColumn('string', 'Topping');
-	  data.addColumn('number', 'Slices');
-	  data.addRows([
-	    ['Mushrooms', 3],
-	    ['Onions', 1],
-	    ['Olives', 1],
-	    ['Zucchini', 1],
-	    ['Pepperoni', 2]
-	  ]);
-	
-	  // Set chart options
-	  var options = {'title':'How Much Pizza I Ate Last Night',
-	                 'width':400,
-	                 'height':300};
-	
-	  // Instantiate and draw our chart, passing in some options.
-	  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-	  chart.draw(data, options);
-	}
-
 $(document).ready(function() {
 	var zoomin = 8;
 	var khwBjdChoose = null;
@@ -290,31 +257,99 @@ $(document).ready(function() {
 		
 	});
 	
+	//나중에 삭제할것(버튼클릭)
 	$('#kwhuse').click(function (){
 		 kwh.setVisible(true);
 	});
 	
-	//필터 설정값 변경
-	function updateLayerFilter(layer, cqlFilter) {
-	    var source = layer.getSource();
-	    
-	    if (cqlFilter) {
-	        if (source.updateParams) {
-	            source.updateParams({ 'CQL_FILTER': cqlFilter });
-	        } else {
-	            source.getParams()['CQL_FILTER'] = cqlFilter;
+	
+	
+	$('#chartModal').on('shown.bs.modal', function () {
+	    // AJAX 요청 보내기
+	    $.ajax({
+	        url: '/charData.do', // 서버 URL 지정
+	        type: 'get', // HTTP 메서드 지정
+	        dataType: 'json',
+	        success: function(data) {
+	        	console.log(data);
+	            // 데이터를 받아와 차트 그리기
+	            drawChart(data);
+	        },
+	        error: function(error) {
+	            console.log(error);
+	            alert('데이터를 불러오는데 실패했습니다.');
 	        }
-	    } else {
-	        // cqlFilter가 없는 경우에는 레이어의 파라미터에서 해당 필터를 제거
-	        if (source.updateParams) {
-	            source.updateParams({ 'CQL_FILTER': null });
-	        } else {
-	            delete source.getParams()['CQL_FILTER'];
+	    });
+	});
+	
+	$('#sdSelectChart').change(function (){
+		var sdSelectedChar = $(this).val();
+		
+		$.ajax({
+	        url: '/charDataSgg.do', // 서버 URL 지정
+	        type: 'post', // HTTP 메서드 지정
+	        dataType: 'json',
+	        data: {'sd_nm': sdSelectedChar},
+	        success: function(data) {
+	        	console.log(data);
+	            // 데이터를 받아와 차트 그리기
+	        	drawChart(data);
+	        },
+	        error: function(error) {
+	            console.log(error);
+	            alert('데이터를 불러오는데 실패했습니다.');
 	        }
-	    }
-	}
+		});
+	});
+
+	
 });
 
+//필터 설정값 변경(위에서 지정했기 때문에 수정하려면 별도의 함수가 필요함)
+function updateLayerFilter(layer, cqlFilter) {
+    var source = layer.getSource();
+    
+    if (cqlFilter) {
+        if (source.updateParams) {
+            source.updateParams({ 'CQL_FILTER': cqlFilter });
+        } else {
+            source.getParams()['CQL_FILTER'] = cqlFilter;
+        }
+    } else {
+        // cqlFilter가 없는 경우에는 레이어의 파라미터에서 해당 필터를 제거
+        if (source.updateParams) {
+            source.updateParams({ 'CQL_FILTER': null });
+        } else {
+            delete source.getParams()['CQL_FILTER'];
+        }
+    }
+}
+
+//구글차트
+google.charts.load('current', {'packages':['corechart']});
+
+// Set a callback to run when the Google Visualization API is loaded.
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart(data) {
+
+  var dataTable = new google.visualization.DataTable();
+  dataTable.addColumn('string', '시도');
+  dataTable.addColumn('number', '전기사용량(kwh)');
+  
+  for(var i = 0; i < data.length; i++){
+	  dataTable.addRow([data[i].sd_nm, data[i].usekwh]);
+  }
+
+  // Set chart options
+  var options = {'title':'전국 전기사용량',
+                 'width':900,
+                 'height':500};
+
+  // Instantiate and draw our chart, passing in some options.
+  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+  chart.draw(dataTable, options);
+}
 
 </script>
 
@@ -344,22 +379,24 @@ $(document).ready(function() {
 	<button onclick="location.href='/main.do'">메인이동</button>
 	
 	<!-- Button trigger modal -->
-	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chartModal">
 	  Launch demo modal
 	</button>
 	
 	<!-- Modal -->
-	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	  <div class="modal-dialog modal-dialog-centered modal-xl">
 	    <div class="modal-content">
 	      <div class="modal-header">
-	        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+	        <select class="form-select" aria-label="Default select example" id="sdSelectChart">
+			  	<option>시도 선택</option>
+		    		<c:forEach items="${sdList }" var="sd">
+		        <option value="${sd.sd_nm }">${sd.sd_nm }</option>
+		    </c:forEach>
+			</select>
 	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	      </div>
 	      <div class="modal-body" id="chart_div"></div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-	        <button type="button" class="btn btn-primary">Save changes</button>
 	      </div>
 	    </div>
 	  </div>

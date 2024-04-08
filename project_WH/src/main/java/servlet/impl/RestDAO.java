@@ -33,4 +33,12 @@ public class RestDAO extends EgovComAbstractDAO {
 		return session.selectOne("rest.getSggGeometry", sgg_cd);
 	}
 
+	public List<Map<String, Object>> chardata() {
+		return session.selectList("rest.charData");
+	}
+
+	public List<Map<String, Object>> charDataSgg(String sd_nm) {
+		return session.selectList("rest.charDataSgg", sd_nm);
+	}
+
 }

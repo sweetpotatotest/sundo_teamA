@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,6 +63,17 @@ public class AjaxRestController {
 		return sggGeometry;
 	}
 	
+	@GetMapping("/charData.do")
+	public List<Map<String, Object>> charData(){
+		List<Map<String, Object>> charData = restService.charData();
+		return charData;
+	}
+	
+	@PostMapping("/charDataSgg.do")
+	public List<Map<String, Object>> charDataSgg(@RequestParam("sd_nm") String sd_nm){
+		List<Map<String, Object>> charDataSgg = restService.charDataSgg(sd_nm);
+		return charDataSgg;
+	}
 	
 	
 }
