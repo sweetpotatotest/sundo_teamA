@@ -14,6 +14,7 @@
 <script
 	src="https://map.vworld.kr/js/apis.do?type=Base&apiKey=A7310A01-5C02-3811-B583-DE851FC4C4C3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link href="<c:url value='/resources/'/>css/map.css" rel="stylesheet" type="text/css" >
 <script>
 	var map;
 	var mapBounds = new OpenLayers.Bounds(123, 32, 134, 43);

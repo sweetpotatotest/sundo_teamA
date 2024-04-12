@@ -18,12 +18,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<style>
-.map {
-   height: 800px;
-   width: 100%;
-}
-</style>
+<link href="<c:url value='/resources/'/>css/map.css" rel="stylesheet" type="text/css" >
 <script type="text/javascript">
 $(document).ready(function() {
 	var zoomin = 8;
@@ -350,12 +345,10 @@ function drawChart(data) {
   var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
   chart.draw(dataTable, options);
 }
-
 </script>
-
 </head>
 <body>
-	<div>
+	<div id="selectSdSggBjd">
 		<select id="sdSelect" name="sdSelect">
 	    	<option>시도 선택</option>
 		    <c:forEach items="${sdList }" var="sd">
@@ -369,38 +362,33 @@ function drawChart(data) {
 			<option>법정동 선택</option>
 		</select>
 	</div>
-	<div>
-		<p id="showSd"></p>
-		<p id="showSgg"></p>
-		<p id="showBjd"></p>
-	</div>
-	<button id="kwhuse">전기사용량</button>
-	<button onclick="location.href='/dataInput.do'">데이터 삽입</button>
-	<button onclick="location.href='/main.do'">메인이동</button>
+	<div class="menu-bar">
+        <button onclick="location.href='/dataInput.do'">데이터 삽입</button>
+        <button onclick="location.href='/main.do'">메인이동</button>
+    </div>
 	
 	<!-- Button trigger modal -->
+	<div class="modalButton">
 	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chartModal">
-	  Launch demo modal
+	  통계차트
 	</button>
+	</div>
 	
 	<!-- Modal -->
 	<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-dialog-centered modal-xl">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <select class="form-select" aria-label="Default select example" id="sdSelectChart">
-			  	<option>시도 선택</option>
-		    		<c:forEach items="${sdList }" var="sd">
-		        <option value="${sd.sd_nm }">${sd.sd_nm }</option>
-		    </c:forEach>
-			</select>
-	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-	      </div>
-	      <div class="modal-body" id="chart_div"></div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <select class="form-select" aria-label="Default select example" id="sdSelectChart">
+                        <option>시도 선택</option>
+                        <!-- Your options go here -->
+                    </select>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="chart_div"></div>
+            </div>
+        </div>
+    </div>
 	
 	
 	<div id="map" class="map"></div>
